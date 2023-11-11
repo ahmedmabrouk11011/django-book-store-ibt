@@ -25,3 +25,19 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/django-book-store-ibt:latest
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: ssh and run docker-compose commands
+        run: |
+          ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
+          cd /home/ubuntu/django-book-store-ibt
+          git pull origin main
+          docker-compose down --rmi all
+          docker-compose up -d
+          EOF
